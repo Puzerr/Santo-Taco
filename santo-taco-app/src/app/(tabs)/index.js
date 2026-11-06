@@ -1,10 +1,10 @@
 import { View, Text } from "react-native";
+import OfertasDia from "../../components/OfertasDia";
 
 function MenuScreen(){
     return(
-        <View>
-            <Text>Teste de tela index</Text>
-        </View>
+    
+        <OfertasDia />
     )
 }
 

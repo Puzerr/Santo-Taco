@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import { View, Button } from "react-native";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { BottomTabBar } from "expo-router/build/layouts/TabsClient.js";
-import Header from "../../components/Header";
 
 const tabBar =
   (name) =>
