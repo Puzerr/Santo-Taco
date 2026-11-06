@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
 import { View, Button } from "react-native";
-import { useState } from "react";
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { BottomTabBar } from "expo-router/build/layouts/TabsClient.js";
+import Header from "../../components/Header";
 
 const tabBar =
   (name) =>
@@ -14,10 +14,10 @@ function BottomTabsLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        screenOptions={{ tabBarActiveTintColor: "#F5B041", headerShown: false }}
+        screenOptions={{ tabBarActiveTintColor: "#E58354", headerShown: false }}
         tabBar={(props) => (
           <View>
-            <Button title="Mesa n°#" color="#F5B041" />
+            <Button title="Mesa n°#" color="#E58354" />
             <BottomTabBar {...props} />
           </View>
         )}
