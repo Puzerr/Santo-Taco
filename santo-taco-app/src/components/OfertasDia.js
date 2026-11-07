@@ -30,8 +30,6 @@ function OfertasDia() {
     },
   ]);
 
-  //Os dados virão da API posteriormente.
-
   const Item = ({ nome, imagem }) => (
     <View style={styles.ItemContainer}>
       <Image
@@ -45,7 +43,7 @@ function OfertasDia() {
   );
 
   return (
-    <View style={styles.container}>
+    <View>
       <Text style={styles.tituloOfertas}>Ofertas do Dia</Text>
       <FlatList
         data={pratosDia}
@@ -53,6 +51,7 @@ function OfertasDia() {
         numColumns={2}
         keyExtractor={(item) => item.id}
         style={styles.lista}
+        scrollEnabled={false}
         columnWrapperStyle={styles.linhaLista}
       />
     </View>
@@ -60,42 +59,37 @@ function OfertasDia() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    minHeight: 100,
-    marginHorizontal: "auto",
-    margin: 20,
-  },
   tituloOfertas: {
     fontFamily: "Roboto",
     fontSize: 30,
     fontWeight: "900",
   },
   lista: {
-    flex: 1,
-    flexDirection: "row",
+    flexGrow: 0,
     marginTop: 10,
   },
   linhaLista: {
-    gap: 40,
+    gap: 24,
+    justifyContent: "space-between",
   },
   ItemContainer: {
-    flex: 2,
-    maxWidth: "50%",
+    flex: 1,
     paddingBottom: 20,
   },
   ItemImage: {
-    width: 150,
-    height: 150,
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 24,
     backgroundColor: "#e0e0e0",
   },
   ItemNome: {
-    maxWidth: 150,
-    alignItems: 'center',
+    maxWidth: "100%",
+    marginTop: 10,
     textAlign: "center",
     fontFamily: "Roboto",
     fontSize: 16,
-    fontWeight: "450",
+    fontWeight: "700",
+    color: "#4A4A"
   },
 });
 

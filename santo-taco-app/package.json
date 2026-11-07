@@ -28,5 +28,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@natalia.li/react-native-nested-list": "^0.2.2"
+  }
 }
