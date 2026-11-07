@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/gaegu": "^0.4.1",
     "@react-native-vector-icons/fontawesome-free-solid": "^2.0.0",
     "@react-native-vector-icons/ionicons": "^14.0.0",
     "@react-native-vector-icons/lucide": "^14.0.0",
     "expo": "~58.0.23",
     "expo-constants": "~58.0.14",
+    "expo-font": "~58.0.11",
+    "expo-image": "^58.0.18",
     "expo-linking": "~58.0.15",
     "expo-router": "~58.0.28",
+    "expo-splash-screen": "~58.0.13",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -24,5 +28,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@natalia.li/react-native-nested-list": "^0.2.2"
+  }
 }
