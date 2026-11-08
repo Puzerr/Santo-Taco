@@ -1,11 +1,9 @@
 import { View, StyleSheet } from "react-native";
-import OfertasDia from "../../components/OfertasDia";
 import TodosPratos from "../../components/TodosPratos";
 
 function MenuScreen() {
   return (
     <View style={styles.container}>
-      <OfertasDia />
       <TodosPratos />
     </View>
   );
