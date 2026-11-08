@@ -5,7 +5,7 @@ import TodosPratos from "../../components/TodosPratos";
 function MenuScreen() {
   return (
     <View style={styles.container}>
-      {/* <OfertasDia /> */}
+      <OfertasDia />
       <TodosPratos />
     </View>
   );
