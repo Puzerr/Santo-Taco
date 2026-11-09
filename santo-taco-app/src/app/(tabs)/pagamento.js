@@ -1,11 +1,20 @@
-import { View, Text } from "react-native";
+import { StyleSheet, View } from "react-native";
+import MenuPagamento from "../../components/MenuPagamento";
 
-function PagamentoScreen() {
+function CategoriasScreen() {
   return (
-    <View>
-      <Text>Teste de tela pagamento</Text>
+    <View style={styles.container}>
+      <MenuPagamento />
     </View>
   );
 }
 
-export default PagamentoScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginHorizontal: 12,
+    marginTop: 20,
+  },
+});
+
+export default CategoriasScreen;
