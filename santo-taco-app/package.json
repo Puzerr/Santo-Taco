@@ -2,6 +2,7 @@
   "name": "refrigerio-app",
   "version": "1.0.0",
   "main": "expo-router/entry",
+  "type": "module",
   "dependencies": {
     "@expo-google-fonts/gaegu": "^0.4.1",
     "@react-native-vector-icons/fontawesome-free-solid": "^2.0.0",
