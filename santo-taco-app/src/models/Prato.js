@@ -15,4 +15,5 @@ const PratoSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export default mongoose.models.Prato || mongoose.models("Pratos", PratoSchema);
+const Prato = mongoose.model("Prato", PratoSchema);
+export default Prato;
