@@ -1,11 +1,20 @@
-import { Text, View } from "react-native";
+import { View, StyleSheet } from "react-native";
+import MenuAdicionar from "../../components/MenuAdicionar";
 
-function AdicionarScreen(params) {
-    return (
-        <View>
-            <Text>Teste de tela adicionar</Text>
-        </View>
-    )
+function AdicionarScreen() {
+  return (
+    <View style={styles.container}>
+      <MenuAdicionar />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginHorizontal: 12,
+    marginTop: 20,
+  },
+});
 
 export default AdicionarScreen;
