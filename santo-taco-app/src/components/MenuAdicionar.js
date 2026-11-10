@@ -1,93 +1,158 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  Image,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { Image } from "expo-image";
-import { useState } from "react";
-import { Pressable, Text, View, StyleSheet, FlatList } from "react-native";
+import { useComanda } from "../contexts/ComandaContext";
 
-function MenuAdicionar() {
-  const [pedidos, setPedidos] = useState([
-    {
-      id: "1",
-      name: "Prato #1",
-      image:
-        "https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?q=80&w=1494&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
-    },
-    {
-      id: "2",
-      name: "Prato #2",
-      image:
-        "https://plus.unsplash.com/premium_photo-1678051141689-1f7a7861b3b4?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
-    },
-    {
-      id: "3",
-      name: "Prato nome bem grande #3",
-      image:
-        "https://plus.unsplash.com/premium_photo-1664476631037-87a2714dd04e?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
-    },
-    {
-      id: "4",
-      name: "Prato nome bem grande #3",
-      image:
-        "https://plus.unsplash.com/premium_photo-1661776649804-6bfa4fc14d09?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
-    },
-  ]);
+const Item = ({ item, aoMudarQuantidade }) => {
+  const Contador = () => (
+    <View style={styles.contadorContainer}>
+      <Pressable
+        style={styles.botaoDiminuirContador}
+        onPress={() => aoMudarQuantidade(item.id, "diminuir")}
+      >
+        <Ionicons name="arrow-back" size={24} color="#111111" />
+      </Pressable>
 
-  const Item = ({ nome, imagem }) => {
-    const [quantidadePedido, setQuantidadePedido] = useState(0);
+      <Text style={styles.textoQuantidade}>{item.quantidade}</Text>
 
-    const handleQuantidade = (tipo) => {
-      if (tipo === "aumentar") {
-        setQuantidadePedido((quantidadePedido) => quantidadePedido + 1);
-      } else if (tipo === "diminuir" && quantidadePedido > 0) {
-        setQuantidadePedido((quantidadePedido) => quantidadePedido - 1);
-      }
-    };
+      <Pressable
+        style={styles.botaoAumentarContador}
+        onPress={() => aoMudarQuantidade(item.id, "aumentar")}
+      >
+        <Ionicons name="arrow-forward" size={24} color="#111111" />
+      </Pressable>
+    </View>
+  );
 
-    const Contador = () => (
-      <View style={styles.contadorContainer}>
-        <Pressable
-          style={styles.botaoDiminuirContador}
-          onPress={() => handleQuantidade("diminuir")}
-        >
-          <Ionicons name="arrow-back" size={24} color="#111111" />
-        </Pressable>
-        <Text style={styles.textoQuantidade}>{quantidadePedido}</Text>
-        <Pressable
-          style={styles.botaoAumentarContador}
-          onPress={() => handleQuantidade("aumentar")}
-        >
-          <Ionicons name="arrow-forward" size={24} color="#111111" />
-        </Pressable>
+  return (
+    <View style={styles.pedidoUnico}>
+      <Image
+        source={{ uri: item.imagem }}
+        contentFit="cover"
+        transition={300}
+        style={styles.itemImage}
+      />
+      <View style={styles.nomeContadorContainer}>
+        <Text style={styles.nomePedido}>{item.nome}</Text>
+        <Contador />
       </View>
-    );
-    return (
-      <View style={styles.pedidoUnico}>
-        <Image
-          source={{ uri: imagem }}
-          contentFit="cover"
-          transition={300}
-          style={styles.itemImage}
-        />
-        <View style={styles.nomeContadorContainer}>
-          <Text style={styles.nomePedido}>{nome}</Text>
-          <Contador />
-        </View>
-      </View>
-    );
+    </View>
+  );
+};
+
+export function MenuAdicionar() {
+  const { itensSelecionados, limparComanda, atualizarQuantidade } =
+    useComanda();
+
+  const [numeroMesa, setNumeroMesa] = useState("");
+  const [nomeCliente, setNomeCliente] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  const valorTotal = itensSelecionados.reduce(
+    (acc, item) => acc + item.valor * item.quantidade,
+    0,
+  );
+
+  const enviarComanda = async () => {
+    if (itensSelecionados.length === 0)
+      return Alert.alert("Aviso", "Selecione pelo menos um prato.");
+    if (!numeroMesa.trim() || !nomeCliente.trim())
+      return Alert.alert("Aviso", "Preencha a Mesa e Cliente.");
+
+    setEnviando(true);
+
+    const pedidosFormatados = itensSelecionados.map((item) => ({
+      pratoId: item.id,
+      nomePrato: item.nome,
+      precoUnidade: item.valor,
+      quantidade: item.quantidade,
+    }));
+
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/comandas`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            numeroMesa: Number(numeroMesa),
+            nomeCliente: nomeCliente,
+            pedidos: pedidosFormatados,
+          }),
+        },
+      );
+
+      if (!response.ok) throw new Error("Falha na requisição");
+
+      Alert.alert("Sucesso!", "Comanda enviada para a cozinha!");
+      limparComanda();
+      setNumeroMesa("");
+      setNomeCliente("");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível enviar a comanda.");
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.tituloAdicionarPage}>Seus Pedidos</Text>
+
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Número da Mesa"
+          keyboardType="numeric"
+          value={numeroMesa}
+          onChangeText={setNumeroMesa}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nome do Cliente"
+          value={nomeCliente}
+          onChangeText={setNomeCliente}
+        />
+      </View>
+
       <FlatList
-        data={pedidos}
-        renderItem={({ item }) => <Item nome={item.name} imagem={item.image} />}
+        data={itensSelecionados}
+        renderItem={({ item }) => (
+          <Item item={item} aoMudarQuantidade={atualizarQuantidade} />
+        )}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         style={styles.listaContainer}
         contentContainerStyle={styles.listaPadding}
       />
-      <Pressable style={styles.botaoFlutuante}>
-        <Text style={styles.textoBotaoEnviar}>Mandar para a cozinha!</Text>
+
+      <View style={styles.resumoTotal}>
+        <Text style={styles.textoTotal}>
+          Total: R$ {valorTotal.toFixed(2).replace(".", ",")}
+        </Text>
+      </View>
+
+      <Pressable
+        style={[styles.botaoFlutuante, enviando && { opacity: 0.7 }]}
+        onPress={enviarComanda}
+        disabled={enviando}
+      >
+        {enviando ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.textoBotaoEnviar}>Mandar para a cozinha!</Text>
+        )}
       </Pressable>
     </View>
   );

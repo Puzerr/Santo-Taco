@@ -32,19 +32,19 @@ function RootLayout() {
   }
 
   return (
-      <SafeAreaProvider>
-        <ComandaProvider>
-          <StatusBar style="auto" />
-          <Stack
-            screenOptions={{
-              header: () => <Header />,
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-        </ComandaProvider>
-      </SafeAreaProvider>
-    );
+    <SafeAreaProvider>
+      <ComandaProvider>
+        <StatusBar style="auto" />
+        <Stack
+          screenOptions={{
+            header: () => <Header />,
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </ComandaProvider>
+    </SafeAreaProvider>
+  );
 }
 
 export default RootLayout;

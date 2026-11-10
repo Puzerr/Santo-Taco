@@ -11,20 +11,46 @@ export const ComandaProvider = ({ children }) => {
       if (existe) {
         return prev.filter((item) => item.id !== prato._id);
       } else {
-        return [...prev, { id: prato._id, valor: prato.preco }];
+        return [
+          ...prev,
+          {
+            id: prato._id,
+            nome: prato.name || prato.nome,
+            valor: prato.preco,
+            quantidade: 1,
+            imagem: prato.imagem || prato.image,
+          },
+        ];
       }
     });
   };
 
-  const limparComanda= () => {
-    setItensSelecionados([]);
-  }
+  const atualizarQuantidade = (id, tipo) => {
+    setItensSelecionados((prev) =>
+      prev
+        .map((item) => {
+          if (item.id === id) {
+            const novaQtd =
+              tipo === "aumentar" ? item.quantidade + 1 : item.quantidade - 1;
+            return { ...item, quantidade: novaQtd };
+          }
+          return item;
+        })
+        .filter((item) => item.quantidade > 0),
+    );
+  };
 
-  return(
-    <ComandaContext.Provider value={{itensSelecionados, toggleItem, limparComanda}}>
-        {children}
+  const limparComanda = () => {
+    setItensSelecionados([]);
+  };
+
+  return (
+    <ComandaContext.Provider
+      value={{ itensSelecionados, toggleItem, limparComanda, atualizarQuantidade }}
+    >
+      {children}
     </ComandaContext.Provider>
-  )
+  );
 };
 
 export const useComanda = () => useContext(ComandaContext);
