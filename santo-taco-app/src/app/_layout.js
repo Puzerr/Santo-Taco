@@ -10,6 +10,7 @@ import {
   Gaegu_400Regular,
   Gaegu_700Bold,
 } from "@expo-google-fonts/gaegu";
+import { ComandaProvider } from "../contexts/ComandaContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,14 +34,16 @@ function RootLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="auto" />
-        <Stack
-          screenOptions={{
-            header: () => <Header />,
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-        </Stack>
+        <ComandaProvider>
+          <StatusBar style="auto" />
+          <Stack
+            screenOptions={{
+              header: () => <Header />,
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </ComandaProvider>
       </SafeAreaProvider>
     </SafeAreaView>
   );

@@ -1,0 +1,25 @@
+import { createContext, useState, useContext } from "react";
+
+const ComandaContext = createContext();
+
+const ComandaProvider = ({ children }) => {
+  const [itensSelecionados, setItensSelecionados] = useState([]);
+
+  const toggleItem = (prato) => {
+    setItensSelecionados((prev) => {
+      const existe = prev.find((item) => item.id === prato._id);
+      if (existe) {
+        return prev.filter((item) => item.id !== prato.id);
+      } else {
+        return [...prev, { id: prato._id, valor: prato.preco }];
+      }
+    });
+  };
+  return(
+    <ComandaContext.Provider value={{itensSelecionados, toggleItem}}>
+        {children}
+    </ComandaContext.Provider>
+  )
+};
+
+export {ComandaContext, ComandaProvider}
