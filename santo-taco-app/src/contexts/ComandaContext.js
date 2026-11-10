@@ -15,8 +15,13 @@ export const ComandaProvider = ({ children }) => {
       }
     });
   };
+
+  const limparComanda= () => {
+    setItensSelecionados([]);
+  }
+
   return(
-    <ComandaContext.Provider value={{itensSelecionados, toggleItem}}>
+    <ComandaContext.Provider value={{itensSelecionados, toggleItem, limparComanda}}>
         {children}
     </ComandaContext.Provider>
   )
