@@ -1,5 +1,5 @@
-import Prato from "../src/models/Prato.js";
-import Categoria from "../src/models/Categoria.js";
+import Prato from "../models/Prato.js";
+import Categoria from "../models/Categoria.js";
 
 const getPratos = async (req, res) => {
   try {

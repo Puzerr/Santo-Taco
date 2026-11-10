@@ -1,9 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import connectDB from "./config/db.js";
+import connectDB from "./src/config/db.js";
 
-import pratoRoutes from "./routes/pratoRoutes.js"
+import pratoRoutes from "./src/routes/pratoRoutes.js"
 
 dotenv.config();
 
