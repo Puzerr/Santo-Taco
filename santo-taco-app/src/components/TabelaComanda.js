@@ -1,6 +1,14 @@
+import React, { useState, useCallback } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
 
 const ValorTotal = ({ total }) => {
   return (
@@ -114,85 +122,54 @@ const Filtro = ({ comandaAtual, setComandaAtual, comandasDisponiveis }) => {
 };
 
 function TabelaComanda() {
-  const [pedidosFeitos, setPedidosFeitos] = useState([
-    {
-      id: "1",
-      nomePrato: "Taco com queijo",
-      precoUnidade: 14.99,
-      quantidade: 2,
-      comanda: "Ricardo",
-    },
-    {
-      id: "2",
-      nomePrato: "Super taco tacoso",
-      precoUnidade: 49.99,
-      quantidade: 3,
-      comanda: "Maria",
-    },
-    {
-      id: "3",
-      nomePrato: "Meu mock ta certinho em vai tomando",
-      precoUnidade: 14.99,
-      quantidade: 2,
-      comanda: "Ricardo",
-    },
-    {
-      id: "4",
-      nomePrato: "Burrito Vegano",
-      precoUnidade: 22.5,
-      quantidade: 1,
-      comanda: "João",
-    },
-    {
-      id: "5",
-      nomePrato: "Porção de Nachos",
-      precoUnidade: 18.0,
-      quantidade: 1,
-      comanda: "Maria",
-    },
-    {
-      id: "6",
-      nomePrato: "Burrito Vegano",
-      precoUnidade: 22.5,
-      quantidade: 1,
-      comanda: "Raphael",
-    },
-    {
-      id: "7",
-      nomePrato: "Porção de Nachos",
-      precoUnidade: 18.0,
-      quantidade: 1,
-      comanda: "Raphael",
-    },
-    {
-      id: "8",
-      nomePrato: "Porção de Nachos",
-      precoUnidade: 18.0,
-      quantidade: 1,
-      comanda: "Maria",
-    },
-    {
-      id: "9",
-      nomePrato: "Burrito Vegano",
-      precoUnidade: 22.5,
-      quantidade: 1,
-      comanda: "Raphael",
-    },
-    {
-      id: "10",
-      nomePrato: "Porção de Nachos",
-      precoUnidade: 18.0,
-      quantidade: 1,
-      comanda: "Raphael",
-    },
-  ]);
+  const [pedidosFeitos, setPedidosFeitos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [comandaAtual, setComandaAtual] = useState("Todos");
+
+  // Busca as comandas no backend e achata o array de pedidos para preencher a tabela
+  const carregarComandas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/comandas`,
+      );
+      if (!response.ok) throw new Error("Falha ao buscar comandas");
+
+      const dados = await response.json();
+
+      // Transforma cada item de pedido da comanda em uma linha plana para a FlatList
+      const pedidosAchatados = [];
+      dados.forEach((comandaDoc) => {
+        comandaDoc.pedidos.forEach((ped, index) => {
+          pedidosAchatados.push({
+            id: `${comandaDoc._id}-${index}`,
+            nomePrato: ped.nomePrato,
+            precoUnidade: ped.precoUnidade,
+            quantidade: ped.quantidade,
+            comanda: `${comandaDoc.nomeCliente} (Mesa ${comandaDoc.numeroMesa})`,
+          });
+        });
+      });
+
+      setPedidosFeitos(pedidosAchatados);
+    } catch (error) {
+      console.error("Erro ao carregar comanda:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Atualiza os dados sempre que a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      carregarComandas();
+    }, []),
+  );
 
   const comandasDisponiveis = [
     "Todos",
     ...new Set(pedidosFeitos.map((item) => item.comanda)),
   ];
-
-  const [comandaAtual, setComandaAtual] = useState(comandasDisponiveis[0]);
 
   const pedidosFiltrados =
     comandaAtual === "Todos"
@@ -205,6 +182,14 @@ function TabelaComanda() {
     }, 0);
     return soma.toFixed(2).replace(".", ",");
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#E5734B" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -237,6 +222,8 @@ function TabelaComanda() {
         ListHeaderComponent={<TabelaHeader />}
         style={styles.listaContainer}
         contentContainerStyle={styles.listaPadding}
+        onRefresh={carregarComandas}
+        refreshing={loading}
       />
       <ValorTotal total={calcularTotal()} />
     </View>
@@ -246,9 +233,13 @@ function TabelaComanda() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   tituloComandaPage: {
-    fontFamily: "Roboto",
     fontSize: 30,
     fontWeight: "900",
     color: "#000000",
@@ -274,7 +265,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   textoFiltro: {
-    fontFamily: "Roboto",
     fontSize: 16,
     fontWeight: "bold",
     color: "#000000",
@@ -323,7 +313,6 @@ const styles = StyleSheet.create({
     borderColor: "#A0522D",
   },
   textoHeader: {
-    fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#FFFFFF",
     textAlign: "center",
@@ -342,8 +331,12 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: "#999999",
   },
+  linhaCelula: {
+    fontSize: 13,
+    color: "#000000",
+    textAlign: "center",
+  },
   textoCelula: {
-    fontFamily: "Roboto",
     fontSize: 13,
     fontWeight: "bold",
     color: "#000000",
@@ -376,7 +369,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   botaoTotalNumero: {
-    fontFamily: "Roboto",
     fontSize: 18,
     fontWeight: "bold",
     color: "#000000",
