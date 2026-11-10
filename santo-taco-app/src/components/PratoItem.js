@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useComanda } from "../hooks/useComanda.js";
+import { useComanda } from "../contexts/ComandaContext";
 
 const PratoItem = ({ prato }) => {
-  const { itensSeleciondos, toggleItem } = useComanda();
-  const isSelecionado = itensSeleciondos.some((item) => item.id === prato._id);
+  const { itensSelecionados, toggleItem } = useComanda();
+  const isSelecionado = itensSelecionados.some((item) => item.id === prato._id);
 
   return (
     <Pressable

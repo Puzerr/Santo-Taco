@@ -10,7 +10,7 @@ import {
   Gaegu_400Regular,
   Gaegu_700Bold,
 } from "@expo-google-fonts/gaegu";
-import { ComandaProvider } from "../contexts/ComandaContext";
+import { ComandaProvider } from "../contexts/ComandaContext.js";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +32,6 @@ function RootLayout() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ComandaProvider>
           <StatusBar style="auto" />
@@ -45,8 +44,7 @@ function RootLayout() {
           </Stack>
         </ComandaProvider>
       </SafeAreaProvider>
-    </SafeAreaView>
-  );
+    );
 }
 
 export default RootLayout;

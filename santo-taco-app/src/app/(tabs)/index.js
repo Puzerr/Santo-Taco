@@ -9,8 +9,7 @@ import TodosPratos from "../../components/TodosPratos";
 import { useEffect, useState } from "react";
 import PratoItem from "../../components/PratoItem";
 
-// Substitua pelo IP da sua máquina na rede local
-const API_URL = "http://192.168.X.X:3000/api/pratos";
+const API_URL = `${process.env.EXPO_PUBLIC_API_URL}/pratos`;
 
 const PaginaInicial = () => {
   const [ofertas, setOfertas] = useState([]);
@@ -132,4 +131,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default { MenuScreen, PaginaInicial };
+export default PaginaInicial;
