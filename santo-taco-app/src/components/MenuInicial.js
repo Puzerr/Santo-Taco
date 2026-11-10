@@ -85,8 +85,8 @@ export default function MenuInicial() {
   return (
     <ScrollView
       ref={scrollViewRef}
-      style={styles.container}
-      contentContainerStyle={styles.paddingBottom}
+      style={{ flex: 1 }}
+      contentContainerStyle={styles.scrollPadding}
       showsVerticalScrollIndicator={false}
     >
       {ofertas.length > 0 && (
@@ -121,9 +121,9 @@ export default function MenuInicial() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-    backgroundColor: "#F2F2F2",
+  scrollPadding: {
+    paddingHorizontal: 20,
+    paddingTop: 40,
   },
   contentContainer: {
     padding: 16,
