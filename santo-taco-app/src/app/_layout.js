@@ -34,10 +34,11 @@ function RootLayout() {
   return (
     <SafeAreaProvider>
       <ComandaProvider>
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
+        <Header />
         <Stack
           screenOptions={{
-            header: () => <Header />,
+            headerShown: false,
           }}
         >
           <Stack.Screen name="(tabs)" />
