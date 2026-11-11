@@ -27,14 +27,15 @@ export default function MenuInicial() {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/pratos`);
       if (!response.ok) throw new Error("Falha ao carregar pratos");
 
-      const pratos = await response.json();
+      const pratosBrutos = await response.json();
 
-      const listaOfertas = pratos.filter(
-        (item) =>
-          item.isOfertaDoDia === true ||
-          item.isOferta === true ||
-          item.oferta === true,
-      );
+      const pratos = pratosBrutos.map((p) => ({
+        ...p,
+        name: p.name || p.nome,
+        imagem: p.imagem && p.imagem.trim() !== "" ? p.imagem : p.image,
+      }));
+
+      const listaOfertas = pratos.filter((item) => item.isOfertaDoDia === true);
       setOfertas(listaOfertas);
 
       const agrupamento = pratos.reduce((acc, prato) => {

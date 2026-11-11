@@ -22,7 +22,13 @@ export default function TodasCategorias() {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/pratos`);
       if (!response.ok) throw new Error("Erro ao buscar pratos");
 
-      const pratos = await response.json();
+      const pratosBrutos = await response.json();
+
+      const pratos = pratosBrutos.map((p) => ({
+        ...p,
+        name: p.name || p.nome,
+        imagem: p.imagem && p.imagem.trim() !== "" ? p.imagem : p.image,
+      }));
 
       const agrupado = pratos.reduce((acc, prato) => {
         const catNome = prato.categoria || "Geral";
