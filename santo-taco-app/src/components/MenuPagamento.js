@@ -1,158 +1,279 @@
+import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { useState, useCallback } from "react";
 import {
-  ActivityIndicator,
+  View,
+  Text,
+  StyleSheet,
   FlatList,
   Pressable,
-  Text,
-  View,
-  StyleSheet,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
 
-function MenuPagamento() {
-  const [gastosComanda, setGastosComandas] = useState([
-{
-      id: "1",
-      valor: 59.96,
-      comanda: "Ricardo",
-    },
-    {
-      id: "2",
-      valor: 185.97,
-      comanda: "Maria",
-    },
-    {
-      id: "3",
-      valor: 22.50,
-      comanda: "João",
-    },
-    {
-      id: "4",
-      valor: 81.00,
-      comanda: "Raphael",
-    },
-  ]);
+export default function PagamentoScreen() {
+  const [comandas, setComandas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [solicitado, setSolicitado] = useState(false);
-  const [carregando, setCarregando] = useState(false);
+  const carregarComandas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/comandas`,
+      );
+      if (!response.ok) throw new Error("Erro ao buscar comandas");
 
-  const handleFecharConta = () => {
-    setCarregando(true);
-    setTimeout(() => {
-      setCarregando(false);
-      setSolicitado(true);
-    }, 400);
+      const dados = await response.json();
+      setComandas(dados);
+    } catch (error) {
+      console.error("Erro ao carregar pagamentos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const ItemLinha = ({ comanda, valor, index }) => {
-    const isPar = index % 2 === 0;
+  useFocusEffect(
+    useCallback(() => {
+      carregarComandas();
+    }, []),
+  );
 
+  const handleChamarGarcom = () => {
+    Alert.alert("Garçom Notificado!", "Um garçom está indo até você!", [
+      { text: "OK", style: "default" },
+    ]);
+  };
+
+  const totalGeral = comandas.reduce((accComanda, comanda) => {
+    const subtotalComanda = comanda.pedidos.reduce(
+      (accItem, item) => accItem + item.precoUnidade * item.quantidade,
+      0,
+    );
+    return accComanda + subtotalComanda;
+  }, 0);
+
+  if (loading) {
     return (
-      <View
-        style={[
-          styles.linha,
-          { backgroundColor: isPar ? "#B8B8B8" : "#D9D9D9" },
-        ]}
-      >
-        <Text style={styles.textoComanda}>{comanda}</Text>
-        <Text style={styles.textoValor}>
-          R${valor.toFixed(2).replace(".", ",")}
-        </Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E5734B" />
       </View>
     );
-  };
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.tituloPagamentoPage}>Pagamento</Text>
-      <View style={styles.tabelaWrapper}>
-        <FlatList
-          data={gastosComanda}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <ItemLinha
-              comanda={item.comanda}
-              valor={item.valor}
-              index={index}
-            />
-          )}
-          scrollEnabled={false}
-        />
-        <Pressable
-          style={styles.botaoFecharConta}
-          onPress={handleFecharConta}
-          disabled={carregando}
-        >
-          {carregando ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.textoBotaoFechar}>Fechar a conta</Text>
-          )}
-        </Pressable>
-      </View>
+      <Text style={styles.tituloPage}>Pagamento</Text>
 
-      {solicitado && (
-        <Text style={styles.mensagemSucesso}>
-          O garçom já está indo até você
-        </Text>
-      )}
+      <FlatList
+        data={comandas}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listPadding}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="receipt-outline" size={48} color="#999" />
+            <Text style={styles.emptyText}>
+              Nenhuma comanda aberta no momento.
+            </Text>
+          </View>
+        }
+        renderItem={({ item: comanda }) => {
+          const totalComanda = comanda.pedidos.reduce(
+            (acc, ped) => acc + ped.precoUnidade * ped.quantidade,
+            0,
+          );
+
+          return (
+            <View style={styles.cardComanda}>
+              <View style={styles.headerCard}>
+                <View>
+                  <Text style={styles.nomeCliente}>{comanda.nomeCliente}</Text>
+                  <Text style={styles.numeroMesa}>
+                    Mesa N° {comanda.numeroMesa}
+                  </Text>
+                </View>
+                <Ionicons name="receipt-outline" size={24} color="#E5734B" />
+              </View>
+
+              <View style={styles.divisor} />
+
+              {comanda.pedidos.map((pedido, idx) => {
+                const subtotalItem = pedido.precoUnidade * pedido.quantidade;
+                return (
+                  <View
+                    key={`${comanda._id}-ped-${idx}`}
+                    style={styles.linhaItem}
+                  >
+                    <Text style={styles.itemTexto}>
+                      {pedido.quantidade}x {pedido.nomePrato}
+                    </Text>
+                    <Text style={styles.itemValor}>
+                      R$ {subtotalItem.toFixed(2).replace(".", ",")}
+                    </Text>
+                  </View>
+                );
+              })}
+
+              <View style={styles.divisor} />
+
+              <View style={styles.rodapeCard}>
+                <Text style={styles.rotuloSubtotal}>Total do Cliente:</Text>
+                <Text style={styles.valorSubtotal}>
+                  R$ {totalComanda.toFixed(2).replace(".", ",")}
+                </Text>
+              </View>
+            </View>
+          );
+        }}
+      />
+
+      <View style={styles.rodapeFixo}>
+        <View style={styles.cardRodape}>
+          <View style={styles.barTotalGeral}>
+            <Text style={styles.textoTotalGeralRotulo}>Total Geral:</Text>
+            <Text style={styles.textoTotalGeralValor}>
+              R$ {totalGeral.toFixed(2).replace(".", ",")}
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.botaoGeralChamarGarcom}
+            onPress={handleChamarGarcom}
+          >
+            <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.textoBotaoGeral}>Chamar Garçom</Text>
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: "#F2F2F2",
+    paddingTop: 16,
   },
-  tituloPagamentoPage: {
-    fontFamily: "Roboto",
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#000000",
-    marginBottom: 20,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F2F2F2",
   },
-  tabelaWrapper: {
-    borderRadius: 10,
-    overflow: "hidden",
+  tituloPage: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#222222",
+    paddingHorizontal: 20,
     marginBottom: 16,
   },
-  linha: {
+  listPadding: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  emptyContainer: {
+    paddingVertical: 60,
+    alignItems: "center",
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#777777",
+  },
+  cardRodape: {
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  headerCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
   },
-  textoComanda: {
-    fontFamily: "Roboto",
+  nomeCliente: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#222222",
   },
-  textoValor: {
-    fontFamily: "Roboto",
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000000",
+  numeroMesa: {
+    fontSize: 14,
+    color: "#666666",
+    marginTop: 2,
   },
-  botaoFecharConta: {
-    backgroundColor: "#000000",
-    paddingVertical: 14,
+  divisor: {
+    height: 1,
+    backgroundColor: "#EEEEEE",
+    marginVertical: 12,
+  },
+  linhaItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  itemTexto: {
+    fontSize: 14,
+    color: "#444444",
+  },
+  itemValor: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#222222",
+  },
+  rodapeCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
   },
-  textoBotaoFechar: {
-    fontFamily: "Roboto",
+  rotuloSubtotal: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#444444",
+  },
+  valorSubtotal: {
     fontSize: 18,
+    fontWeight: "bold",
+    color: "#48B052",
+  },
+  rodapeFixo: {
+    backgroundColor: "#F2F2F2",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  barTotalGeral: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#A66A4B",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  textoTotalGeralRotulo: {
+    fontSize: 16,
     fontWeight: "bold",
     color: "#FFFFFF",
   },
-  mensagemSucesso: {
-    fontFamily: "Roboto",
-    fontSize: 18,
+  textoTotalGeralValor: {
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#4CAF50",
-    textAlign: "center",
-    marginTop: 10,
+    color: "#FFFFFF",
+  },
+  botaoGeralChamarGarcom: {
+    flexDirection: "row",
+    backgroundColor: "#DE7952",
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  textoBotaoGeral: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
-
-export default MenuPagamento;
