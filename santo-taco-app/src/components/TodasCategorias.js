@@ -1,161 +1,220 @@
 import { Ionicons } from "@react-native-vector-icons/ionicons";
-import { useState, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import {
+  View,
+  Text,
+  StyleSheet,
   FlatList,
   Pressable,
-  StyleSheet,
-  Text,
-  View,
-  Animated,
+  ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
+import { useRouter, useFocusEffect } from "expo-router";
 
-function TodasCategorias() {
-  const [categorias, setCategorias] = useState([
-    {
-      categoriaId: "1",
-      categoriaName: "Tacos de carne",
-      categoriaDescription: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent at ultrices massa. Aenean auctor eu ipsum a tincidunt. Mauris egestas elementum aliquet. Nulla facilisi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Suspendisse vel dolor eget mi faucibus porta ut id tellus. Sed finibus sapien purus, id sollicitudin lectus congue sed. Nunc ut elit a nulla vestibulum commodo. Maecenas sed blandit libero, ac placerat erat. Praesent facilisis risus pulvinar vestibulum venenatis. Nam at nulla at ante vestibulum posuere. Etiam mattis a tortor nec ultrices. Praesent finibus erat sem, in pharetra nunc gravida ac. \n\n Vivamus tincidunt erat dolor, in posuere ex gravida quis. Nam ut est felis. Donec sollicitudin posuere tempus. Curabitur consectetur vitae ante vitae luctus. Cras enim nunc, viverra id pulvinar euismod, gravida ac ipsum. Vestibulum varius erat a purus rutrum commodo. Duis magna tellus, interdum in fermentum sed, volutpat blandit velit. Aliquam lorem mi, eleifend eu faucibus sed, commodo id nunc. Integer ullamcorper feugiat dolor. Suspendisse potenti.",
-    },
-    {
-      categoriaId: "2",
-      categoriaName: "Tacos apimentados",
-      categoriaDescription: "Tacos deliciosos para os amanates de pimenta.",
-    },
-    {
-      categoriaId: "3",
-      categoriaName: "Tacos veganos",
-      categoriaDescription: "Tacos livres de ingredientes de origem animal.",
-    },
-  ]);
+export default function TodasCategorias() {
+  const router = useRouter();
+  const [categoriasComPratos, setCategoriasComPratos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const Item = ({ nome, descricao }) => {
-    const [expandido, setExpandido] = useState(false);
+  const carregarPratosECategorias = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/pratos`);
+      if (!response.ok) throw new Error("Erro ao buscar pratos");
 
-    const handleExpandirCard = () => {
-      setExpandido(!expandido);
-    };
+      const pratosBrutos = await response.json();
 
-    const animacaoGiro = useRef(new Animated.Value(0)).current;
+      const pratos = pratosBrutos.map((p) => ({
+        ...p,
+        name: p.name || p.nome,
+        imagem: p.imagem && p.imagem.trim() !== "" ? p.imagem : p.image,
+      }));
 
-    useEffect(() => {
-      Animated.timing(animacaoGiro, {
-        toValue: expandido ? 1 : 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }, [expandido]);
+      const agrupado = pratos.reduce((acc, prato) => {
+        const catNome = prato.categoria || "Geral";
+        if (!acc[catNome]) {
+          acc[catNome] = [];
+        }
+        acc[catNome].push(prato);
+        return acc;
+      }, {});
 
-    const rotacao = animacaoGiro.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["0deg", "180deg"],
+      const listaFormatada = Object.keys(agrupado).map((catNome) => ({
+        categoria: catNome,
+        pratos: agrupado[catNome],
+      }));
+
+      setCategoriasComPratos(listaFormatada);
+    } catch (error) {
+      console.error("Erro em Categorias:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarPratosECategorias();
+    }, []),
+  );
+
+  const irParaPratoNaHome = (pratoId) => {
+    router.push({
+      pathname: "/",
+      params: { pratoId },
     });
+  };
 
+  if (loading) {
     return (
-      <View style={styles.categoriaCard}>
-        <Pressable onPress={handleExpandirCard} style={styles.headerDropdown}>
-          <Text style={styles.tituloCategoria}>{nome}</Text>
-          <Animated.View style={{ transform: [{ rotate: rotacao }] }}>
-            <Ionicons name="chevron-down" />
-          </Animated.View>
-        </Pressable>
-
-        {expandido && (
-          <View style={styles.conteudoSanfona}>
-            <Text style={styles.divisor}>{descricao}</Text>
-            <Pressable style={styles.botaoAcao}>
-              <Text style={styles.textoBotao}>Ver pratos</Text>
-            </Pressable>
-          </View>
-        )}
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E5734B" />
       </View>
     );
-  };
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.tituloCategoriaPage}>Categorias</Text>
+      <Text style={styles.tituloPage}>Categorias</Text>
+
       <FlatList
-        data={categorias}
-        renderItem={({ item }) => (
-          <Item
-            nome={item.categoriaName}
-            descricao={item.categoriaDescription}
-          />
-        )}
-        keyExtractor={(item) => item.categoriaId}
+        data={categoriasComPratos}
+        keyExtractor={(item) => item.categoria}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listaPadding}
+        contentContainerStyle={styles.listPadding}
+        renderItem={({ item: secaoCat }) => (
+          <View style={styles.secaoCategoria}>
+            <Text style={styles.nomeCategoria}>{secaoCat.categoria}</Text>
+
+            {secaoCat.pratos.map((prato) => (
+              <View key={prato._id} style={styles.cardPrato}>
+                <Image
+                  source={{ uri: prato.imagem || prato.image }}
+                  contentFit="cover"
+                  transition={300}
+                  style={styles.imagemPrato}
+                />
+
+                <View style={styles.infoContainer}>
+                  <Text style={styles.nomePrato}>
+                    {prato.name || prato.nome}
+                  </Text>
+
+                  {prato.descricao && (
+                    <Text style={styles.descricaoPrato} numberOfLines={2}>
+                      {prato.descricao}
+                    </Text>
+                  )}
+
+                  <Text style={styles.precoPrato}>
+                    R$ {Number(prato.preco).toFixed(2).replace(".", ",")}
+                  </Text>
+
+                  <Pressable
+                    style={styles.botaoVerPrato}
+                    onPress={() => irParaPratoNaHome(prato._id)}
+                  >
+                    <Text style={styles.textoBotao}>Ver na Página Inicial</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  tituloCategoriaPage: {
-    fontFamily: "Roboto",
-    fontSize: 30,
-    fontWeight: "900",
-  },
-  listaPadding: {
-    padding: 20,
-    paddingTop: 30,
-  },
   container: {
     flex: 1,
+    backgroundColor: "#F2F2F2",
+    paddingTop: 16,
   },
-  categoriaCard: {
-    marginBottom: 14,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    elevation: 2,
-  },
-  headerDropdown: {
-    flexDirection: "row",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "space-between",
+  },
+  tituloPage: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#222222",
     paddingHorizontal: 20,
-    paddingVertical: 18,
-  },
-  tituloCategoria: {
-    fontFamily: "Roboto",
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111111",
-  },
-  conteudoSanfona: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-
-  },
-  divisor: {
-    paddingVertical: 10,
-    paddingLeft: 10,
     marginBottom: 16,
-    borderRadius: 5,
-    backgroundColor: "#E5E5E5",
   },
-  descCategoria: {
-    fontFamily: "Roboto",
-    fontSize: 14,
-    color: "#555555",
-    lineHeight: 22,
-    marginBottom: 20,
+  listPadding: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
   },
-  botaoAcao: {
-    backgroundColor: "#E58354",
+  secaoCategoria: {
+    marginBottom: 24,
+  },
+  nomeCategoria: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#E5734B",
+    marginBottom: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: "#E5734B",
+    paddingBottom: 4,
+    alignSelf: "flex-start",
+  },
+  cardPrato: {
     flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  imagemPrato: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+  },
+  infoContainer: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "space-between",
+  },
+  nomePrato: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#222222",
+  },
+  descricaoPrato: {
+    fontSize: 13,
+    color: "#666666",
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  precoPrato: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#48B052",
+    marginBottom: 6,
+  },
+  botaoVerPrato: {
+    flexDirection: "row",
+    backgroundColor: "#E5734B",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 8,
+    gap: 6,
+    alignSelf: "flex-start",
   },
   textoBotao: {
     color: "#FFFFFF",
-    fontFamily: "Roboto",
-    fontSize: 15,
-    fontWeight: "600",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
-
-export default TodasCategorias;

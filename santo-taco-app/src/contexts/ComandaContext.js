@@ -1,25 +1,56 @@
 import { createContext, useState, useContext } from "react";
 
-const ComandaContext = createContext();
+export const ComandaContext = createContext();
 
-const ComandaProvider = ({ children }) => {
+export const ComandaProvider = ({ children }) => {
   const [itensSelecionados, setItensSelecionados] = useState([]);
 
   const toggleItem = (prato) => {
     setItensSelecionados((prev) => {
       const existe = prev.find((item) => item.id === prato._id);
       if (existe) {
-        return prev.filter((item) => item.id !== prato.id);
+        return prev.filter((item) => item.id !== prato._id);
       } else {
-        return [...prev, { id: prato._id, valor: prato.preco }];
+        return [
+          ...prev,
+          {
+            id: prato._id,
+            nome: prato.name || prato.nome,
+            valor: prato.preco,
+            quantidade: 1,
+            imagem: prato.imagem || prato.image,
+          },
+        ];
       }
     });
   };
-  return(
-    <ComandaContext.Provider value={{itensSelecionados, toggleItem}}>
-        {children}
+
+  const atualizarQuantidade = (id, tipo) => {
+    setItensSelecionados((prev) =>
+      prev
+        .map((item) => {
+          if (item.id === id) {
+            const novaQtd =
+              tipo === "aumentar" ? item.quantidade + 1 : item.quantidade - 1;
+            return { ...item, quantidade: novaQtd };
+          }
+          return item;
+        })
+        .filter((item) => item.quantidade > 0),
+    );
+  };
+
+  const limparComanda = () => {
+    setItensSelecionados([]);
+  };
+
+  return (
+    <ComandaContext.Provider
+      value={{ itensSelecionados, toggleItem, limparComanda, atualizarQuantidade }}
+    >
+      {children}
     </ComandaContext.Provider>
-  )
+  );
 };
 
-export {ComandaContext, ComandaProvider}
+export const useComanda = () => useContext(ComandaContext);

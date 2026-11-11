@@ -14,12 +14,7 @@ function BottomTabsLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{ tabBarActiveTintColor: "#E58354", headerShown: false }}
-        tabBar={(props) => (
-          <View>
-            <Button title="Mesa n°#" color="#E58354" />
-            <BottomTabBar {...props} />
-          </View>
-        )}
+        
       >
         <Tabs.Screen
           name="index"

@@ -1,19 +1,24 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useComanda } from "../hooks/useComanda.js";
+import { useComanda } from "../contexts/ComandaContext";
 
 const PratoItem = ({ prato }) => {
-  const { itensSeleciondos, toggleItem } = useComanda();
-  const isSelecionado = itensSeleciondos.some((item) => item.id === prato._id);
+  const { itensSelecionados, toggleItem } = useComanda();
+  const isSelecionado = itensSelecionados.some((item) => item.id === prato._id);
+
+  const nomePrato = prato.name || prato.nome;
+
+  const urlImagem =
+    prato.imagem && prato.imagem.trim() !== "" ? prato.imagem : prato.image;
 
   return (
     <Pressable
       style={[styles.container, isSelecionado && styles.containerSelecionado]}
       onPress={() => toggleItem(prato)}
     >
-      <Image source={{ uri: prato.image }} style={styles.imagem} />
+      <Image source={{ uri: urlImagem }} style={styles.imagem} />
       <View style={styles.info}>
-        <Text style={styles.nome}>{prato.name}</Text>
+        <Text style={styles.nome}>{nomePrato}</Text>
         <Text style={styles.preco}>
           R$ {prato.preco.toFixed(2).replace(".", ",")}
         </Text>
