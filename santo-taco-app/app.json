@@ -15,7 +15,8 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.puzer.santotacoapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +32,16 @@
       ],
       "expo-font",
       "expo-splash-screen"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "c62ed311-73d3-4dc8-850f-77e978a98ffb"
+      }
+    }
   }
 }
