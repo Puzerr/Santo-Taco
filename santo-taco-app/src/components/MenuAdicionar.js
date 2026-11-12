@@ -1,5 +1,5 @@
 import Ionicons from "@react-native-vector-icons/ionicons";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { Image } from "expo-image";
+import { useAudioPlayer } from "expo-audio";
 import { useComanda } from "../contexts/ComandaContext";
 
 const Item = ({ item, aoMudarQuantidade }) => {
@@ -48,12 +49,26 @@ const Item = ({ item, aoMudarQuantidade }) => {
   );
 };
 
+const somConfirmarPedido = require("../../assets/sounds/bellsoundfeedback.mp3")
+
 export default function MenuAdicionar() {
   const { itensSelecionados, limparComanda, atualizarQuantidade } = useComanda();
   const [numeroMesa, setNumeroMesa] = useState("");
   const [nomeCliente, setNomeCliente] = useState("");
   const [enviando, setEnviando] = useState(false);
 
+  const player = useAudioPlayer(somConfirmarPedido);
+
+  const tocarEfeitoSonoro = () => {
+    try {
+      player.seekTo(0);
+      player.play();
+    } catch (error) {
+      console.log("Erro ao reproduzir som:", error);
+    }
+  };
+
+  
   const valorTotal = itensSelecionados.reduce(
     (acc, item) => acc + item.valor * item.quantidade,
     0
@@ -88,6 +103,8 @@ export default function MenuAdicionar() {
       });
 
       if (!response.ok) throw new Error("Falha na requisição");
+
+      tocarEfeitoSonoro()
 
       Alert.alert("Sucesso!", "Comanda enviada para a cozinha!");
       limparComanda();
