@@ -44,7 +44,7 @@ Para fazer essa magia gastronômica acontecer no mundo digital, utilizamos as se
 
 ## 📱 É possível instalar o aplicativo?
 
-Infelizmente não. O projeto não será lançado em nenhuma loja de aplicativo apenas localmente.
+Não será possível instalar o aplicativo. O arquivo executável do projeto foi limitado ao ambiente de desenvolvimento.
 
 ---
 
@@ -55,16 +55,16 @@ Se você é um desenvolvedor e quer rodar o **Santo Taco** na sua própria máqu
 **1. Clone o repositório**
 Primeiro, você precisa baixar o código para o seu computador. Abra o terminal e digite:
 ```bash
-git clone https://github.com/seu-usuario/santo-taco.git
+git clone https://github.com/Puzerr/Santo-Taco.git
 ```
 
 **2. Acesse a pasta do projeto**
 ```bash
-cd santo-taco
+cd santo-taco-app
 ```
 
 **3. Instale as dependências**
-Agora, vamos baixar todos os "ingredientes" que o nosso app precisa para funcionar:
+Todas as dependências do projeto.
 ```bash
 npm install
 ```
@@ -73,7 +73,7 @@ npm install
 **4. Configure o Banco de Dados**
 Crie um arquivo `.env` na raiz do projeto e adicione a sua chave de conexão do **MongoDB**. O arquivo deve ficar parecido com isso:
 ```env
-MONGO_URI=sua_string_de_conexao_aqui
+MONGO_URI=https://santo-taco-backend.onrender.com/api
 ```
 
 **5. Rode o aplicativo!**
@@ -81,9 +81,17 @@ Com tudo instalado e o banco de dados configurado, é só iniciar o servidor do 
 ```bash
 npx expo start
 ```
+_É possível executar o projeto no navegador ao utilizar o parâmetro ```--web```, porém a experiência será comprometida._
+
+---
 
 Pronto! Um QR Code vai aparecer no seu terminal. Basta escaneá-lo com o aplicativo *Expo Go* no seu celular (ou usar um emulador no computador) para ver o **Santo Taco** funcionando ao vivo! 🎉
 
 ---
 
-_Obervação: o projeto está sendo feito no ambiente web, devido à falta de hardware dedicado ao emulador mobile._
+## ☁️ Sobre a API
+Ao abrir o aplicativo, levará alguns segundos até carregar as informações. Isso acontece devido a um comportamento padrão do Render (host da API) em que o serviço hiberna após 15 minutos de atividade. Após isso  latência diminui. 
+
+---
+
+_Obervação: o projeto foi desenvolvido com foco nos dispositivos Android. Dispositivos iOS podem experienciar problemas técnicos._
