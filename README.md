@@ -31,6 +31,28 @@ Na hora de fazer o pedido, basta informar para qual comanda aquele prato vai. No
 
 ---
 
+## 📱 Telas 
+
+### 1. Menu principal (Ofertas do dia + Todos os pratos)
+<img width="402" height="868" alt="image" src="https://github.com/user-attachments/assets/a96572a2-477b-4c90-a49c-9bb19fefa141" />
+
+### 2. Comanda Rápida
+<img width="399" height="873" alt="image" src="https://github.com/user-attachments/assets/b3c66b81-3e6b-4cd2-9a56-5f0d55cfd5a2" />
+
+### 3. Escolha de pedido (Mesa e comanda)
+<img width="401" height="871" alt="image" src="https://github.com/user-attachments/assets/ea2fbcc6-8d85-44c1-9ee4-2c5bb0b65c5c" />
+<img width="401" height="870" alt="image" src="https://github.com/user-attachments/assets/bf4edf53-5908-42bd-87cf-db987943a419" />
+
+### 4. Categorias de alimentos
+<img width="401" height="871" alt="image" src="https://github.com/user-attachments/assets/928b35bd-600b-47db-bca7-c39082fca960" />
+
+### 5. Pagamento
+<img width="402" height="871" alt="image" src="https://github.com/user-attachments/assets/a3293b18-de2e-4c2a-8ab4-1f798497e136" />
+
+
+
+---
+
 ## 💻 Tecnologias Utilizadas
 
 Para fazer essa magia gastronômica acontecer no mundo digital, utilizamos as seguintes ferramentas:
@@ -71,9 +93,9 @@ npm install
 *(Se você prefere o yarn, pode usar `yarn install`)*
 
 **4. Configure o Banco de Dados**
-Crie um arquivo `.env` na raiz do projeto e adicione a sua chave de conexão do **MongoDB**. O arquivo deve ficar parecido com isso:
+Crie um arquivo `.env` na raiz do projeto e adicione a sua chave de conexão do **MongoDB**. O arquivo deve ficar desse jeito:
 ```env
-MONGO_URI=https://santo-taco-backend.onrender.com/api
+EXPO_PUBLIC_API_URL=https://santo-taco-backend.onrender.com/api
 ```
 
 **5. Rode o aplicativo!**
